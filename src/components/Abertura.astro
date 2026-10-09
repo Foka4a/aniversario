@@ -1,0 +1,25 @@
+---
+import type { Homenagem } from '../tipos';
+import Polaroid from './Polaroid.astro';
+
+interface Props {
+  h: Homenagem;
+}
+const { h } = Astro.props;
+---
+
+<section class="estacao apoiado abertura" data-rotulo="Abertura" aria-label="Abertura">
+  <div class="conteudo">
+    <div class="textos">
+      <p class="sobrelinha"><i class="ponto"></i>{h.abertura.chamada}</p>
+      <h1 class="nome">{h.nome ? h.nome : <span class="vaga">Nome dela</span>}</h1>
+      {h.abertura.frase
+        ? <p class="lide">{h.abertura.frase}</p>
+        : <p class="lide vaga-texto">{h.abertura.dicaFrase}</p>}
+      <p class="dica-rolagem">Role para seguir o fio <span aria-hidden="true">→</span></p>
+    </div>
+    <div class="fotos">
+      <Polaroid foto={h.abertura.foto} numero={1} tamanho="media" giro={4} prioridade />
+    </div>
+  </div>
+</section>

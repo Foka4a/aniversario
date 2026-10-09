@@ -1,0 +1,43 @@
+---
+/* O "miolo" de uma foto: a imagem otimizada, ou o espaço reservado quando ainda não tem foto. */
+import { Image } from 'astro:assets';
+import type { Foto, Formato } from '../tipos';
+import { acharFoto, proporcao, nomeFormato, doisDigitos } from '../lib/fotos';
+
+interface Props {
+  foto: Foto;
+  numero: number;
+  formatoPadrao: Formato;
+  sizes: string;
+  mostrarFormato?: boolean;
+  prioridade?: boolean;
+}
+
+const { foto, numero, formatoPadrao, sizes, mostrarFormato = true, prioridade = false } = Astro.props;
+const formato = foto.formato ?? formatoPadrao;
+const imagem = acharFoto(foto.arquivo);
+const faltando = Boolean(foto.arquivo) && !imagem;
+---
+
+<div class="quadro" style={`--ar:${proporcao[formato]}`}>
+  {imagem ? (
+    <Image
+      src={imagem}
+      alt={foto.legenda ?? ''}
+      widths={[360, 640, 960, 1280]}
+      sizes={sizes}
+      loading={prioridade ? 'eager' : 'lazy'}
+      decoding="async"
+      style={foto.foco ? `object-position:${foto.foco}` : undefined}
+    />
+  ) : (
+    <div class="vazio">
+      <svg class="icone" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+        <circle cx="12" cy="13.5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+      <b>Foto {doisDigitos(numero)}</b>
+      {faltando ? <small class="erro">não achei “{foto.arquivo}”</small> : mostrarFormato && <small>{nomeFormato[formato]}</small>}
+    </div>
+  )}
+</div>

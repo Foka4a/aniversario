@@ -1,0 +1,24 @@
+---
+import type { Homenagem } from '../tipos';
+import Mensagem from './Mensagem.astro';
+
+interface Props {
+  final: Homenagem['final'];
+}
+const { final } = Astro.props;
+---
+
+<section class="estacao pendurado final" data-rotulo="Mensagem final" aria-label="Mensagem final">
+  <div class="conteudo">
+    <article class="carta" style="--r:-1.2deg">
+      <i class="pregador p1" aria-hidden="true"></i>
+      <i class="pregador p2" aria-hidden="true"></i>
+      <p class="sobrelinha">Para fechar</p>
+      <h2 class="carta-titulo">{final.titulo}</h2>
+      <Mensagem texto={final.mensagem} dica={final.dica} rotulo="" linhas={5} classe="carta-corpo" />
+      <p class="assinatura">
+        Com carinho, {final.assinatura ? final.assinatura : <span class="vaga">seu nome</span>}
+      </p>
+    </article>
+  </div>
+</section>

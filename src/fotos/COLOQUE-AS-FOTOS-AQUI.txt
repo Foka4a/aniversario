@@ -1,0 +1,2 @@
+Coloque as fotos nesta pasta (jpg, png, webp ou avif).
+Depois escreva o nome do arquivo em src/conteudo.ts, por exemplo: arquivo: 'praia.jpg'

@@ -1,0 +1,782 @@
+/* O Fio da Nova Vida
+   Layout: a rolagem vertical move uma trilha horizontal; um cordão de luzinhas liga estações que
+   alternam entre fotos penduradas (fio em cima) e fotos apoiadas (fio embaixo), como um varal de pisca-pisca. */
+
+:root {
+  --noite: #140726;
+  --ameixa: #2a0e4a;
+  --lilas: #d9c6ff;
+  --lampada: #ffd88a;
+  --rosa: #ff9bd6;
+  --papel: #fcf8ff;
+  --tinta: #2b1944;
+  --tinta-suave: #7d68a3;
+  --texto: #f4edff;
+  --apagado: #bba5e3;
+  --vidro: rgba(34, 10, 64, 0.58);
+  --vidro-borda: rgba(217, 198, 255, 0.28);
+  --pauta: rgba(217, 198, 255, 0.22);
+  --listra-a: #efe6fd;
+  --listra-b: #e5d8fa;
+  --tracejado: rgba(125, 104, 163, 0.5);
+  --madeira: #e6bd86;
+  --madeira-escura: #b88b55;
+  --mola: #a59fbd;
+  --sombra: rgba(8, 2, 20, 0.75);
+  --cordao-a: #f8e7c0;
+  --cordao-b: #c7a6ff;
+
+  --f-titulo: 'Gloock', Georgia, 'Times New Roman', serif;
+  --f-texto: 'Figtree', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --f-mao: 'Nothing You Could Do', 'Segoe Print', 'Bradley Hand', cursive;
+
+  --H: 100svh;
+  --vao: clamp(200px, 24vw, 360px);
+  --esc: 1;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--noite);
+}
+
+body {
+  color: var(--texto);
+  font-family: var(--f-texto);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ---------- céu ---------- */
+.ceu {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(90% 70% at 12% 0%, rgba(123, 63, 196, 0.38), transparent 62%),
+    radial-gradient(80% 60% at 100% 100%, rgba(197, 76, 180, 0.24), transparent 60%),
+    radial-gradient(60% 50% at 60% 40%, rgba(42, 14, 74, 0.9), transparent 70%),
+    var(--noite);
+}
+.ceu::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(10, 3, 20, 0.6) 100%);
+}
+.camada {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  contain: layout style;
+}
+.luz {
+  position: absolute;
+  width: calc(var(--t) * var(--esc));
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--c), var(--a)) 0%,
+    rgba(var(--c), calc(var(--a) * 0.5)) 50%,
+    rgba(var(--c), 0) 100%
+  );
+}
+.luz.disco {
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--c), calc(var(--a) * 0.6)) 0%,
+    rgba(var(--c), calc(var(--a) * 0.55)) 76%,
+    rgba(var(--c), calc(var(--a) * 0.95)) 90%,
+    rgba(var(--c), 0) 100%
+  );
+}
+.luz.viva {
+  animation: cintila var(--dur) ease-in-out var(--atraso) infinite alternate;
+}
+@keyframes cintila {
+  from {
+    opacity: 0.5;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, var(--sobe), 0);
+  }
+}
+
+/* ---------- palco e trilha ---------- */
+.rolagem {
+  position: relative;
+  z-index: 1;
+}
+.palco {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+}
+.trilha {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  gap: var(--vao);
+  width: max-content;
+  padding-inline: clamp(24px, 7vw, 110px) clamp(150px, 22vw, 320px);
+  will-change: transform;
+}
+
+/* ---------- o fio ---------- */
+.fio {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+.fio path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rastro {
+  stroke: rgba(217, 198, 255, 0.2);
+  stroke-width: 1.3;
+  stroke-dasharray: 1.5 7;
+}
+.brilho {
+  stroke: rgba(255, 216, 138, 0.13);
+  stroke-width: 9;
+}
+.cordao {
+  stroke-width: 1.3;
+}
+.cordao.a {
+  stroke: var(--cordao-a);
+}
+.cordao.b {
+  stroke: var(--cordao-b);
+  opacity: 0.9;
+}
+.lampada {
+  opacity: 0.28;
+  transition: opacity 0.45s ease;
+}
+.lampada .halo,
+.lampada .aura {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.lampada.acesa {
+  opacity: 1;
+}
+.lampada.acesa .halo {
+  opacity: 0.32;
+}
+.lampada.acesa .aura {
+  opacity: 0.1;
+}
+.c0 circle {
+  fill: var(--lampada);
+}
+.c1 circle {
+  fill: var(--rosa);
+}
+.c2 circle {
+  fill: var(--lilas);
+}
+
+/* ---------- estações ---------- */
+.estacao {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.estacao.pendurado {
+  justify-content: flex-start;
+  padding-top: calc(var(--H) * 0.16);
+}
+.estacao.apoiado {
+  justify-content: flex-end;
+  padding-bottom: calc(var(--H) * 0.18);
+}
+
+/* retrato: tudo empilhado */
+.conteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  width: min(360px, 84vw);
+}
+.fotos {
+  display: flex;
+  gap: 14px;
+}
+.pendurado .fotos {
+  align-items: flex-start;
+}
+.apoiado .fotos {
+  align-items: flex-end;
+}
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ---------- textos ---------- */
+.sobrelinha {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font: 600 11px/1.2 var(--f-texto);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--apagado);
+}
+.sobrelinha .data {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--lilas);
+}
+.sobrelinha .data.vaga {
+  opacity: 0.75;
+}
+.ponto {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--lampada);
+  box-shadow: 0 0 10px var(--lampada);
+}
+.vaga {
+  color: var(--lilas);
+  text-decoration: underline dashed rgba(217, 198, 255, 0.45);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.16em;
+}
+.nome {
+  margin: 0;
+  font: 400 clamp(52px, 8.5vw, 116px) / 0.95 var(--f-titulo);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.lide {
+  margin: 0;
+  max-width: 34ch;
+  font-size: clamp(16px, 1.5vw, 19px);
+  color: var(--texto);
+}
+.lide.vaga-texto {
+  font-style: italic;
+  color: var(--apagado);
+}
+.dica-rolagem {
+  margin: 4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 13px/1 var(--f-texto);
+  letter-spacing: 0.04em;
+  color: var(--apagado);
+}
+.dica-rolagem span {
+  display: inline-block;
+  color: var(--lampada);
+  animation: empurra 1.6s ease-in-out infinite;
+}
+@keyframes empurra {
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+.m-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.m-titulo {
+  margin: 0;
+  font: 400 clamp(26px, 3vw, 38px) / 1.08 var(--f-titulo);
+  text-wrap: balance;
+}
+
+.nota {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--vidro);
+  border: 1px dashed var(--vidro-borda);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+}
+.nota:has(.nota-texto) {
+  border-style: solid;
+}
+.nota-rotulo {
+  margin: 0;
+  font: 600 10.5px/1 var(--f-texto);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lampada);
+}
+.nota-dica {
+  margin: 0;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--apagado);
+}
+.nota-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+.nota-texto p {
+  margin: 0;
+}
+.pautas {
+  display: grid;
+  gap: 13px;
+  padding-top: 2px;
+}
+.pautas i {
+  display: block;
+  height: 0;
+  border-bottom: 1px dashed var(--pauta);
+}
+.pautas i:last-child {
+  width: 62%;
+}
+.nota .pautas i:nth-child(n + 2) {
+  display: none;
+}
+
+/* ---------- polaroids ---------- */
+.polaroid {
+  position: relative;
+  margin: 0;
+  flex: 0 0 auto;
+  background: var(--papel);
+  padding: 9px 9px 0;
+  border-radius: 3px;
+  box-shadow:
+    0 22px 40px -20px var(--sombra),
+    0 2px 6px rgba(8, 2, 20, 0.35);
+  transform: rotate(var(--r, 0deg));
+}
+.pendurado .polaroid {
+  margin-top: 12px;
+  transform-origin: 50% 0;
+}
+.apoiado .polaroid {
+  margin-bottom: 12px;
+  transform-origin: 50% 100%;
+}
+.quadro {
+  position: relative;
+  aspect-ratio: var(--ar, 4 / 5);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--listra-b);
+}
+.quadro img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vazio {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 5px;
+  text-align: center;
+  background: repeating-linear-gradient(135deg, var(--listra-a) 0 10px, var(--listra-b) 10px 20px);
+  outline: 1.5px dashed var(--tracejado);
+  outline-offset: -7px;
+  color: var(--tinta-suave);
+}
+.icone {
+  width: 26px;
+  height: 26px;
+}
+.vazio b {
+  font: 600 11px/1 var(--f-texto);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.vazio small {
+  font-size: 11px;
+  opacity: 0.85;
+  padding-inline: 8px;
+}
+.vazio .erro {
+  color: #b0306a;
+  opacity: 1;
+  font-weight: 600;
+}
+.polaroid figcaption {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 4px;
+  font: 17px/1 var(--f-mao);
+  color: var(--tinta-suave);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.p-grande {
+  width: min(calc(var(--H) * 0.27), 56vw);
+}
+.p-media {
+  width: min(calc(var(--H) * 0.22), 38vw);
+}
+.p-pequena {
+  width: min(calc(var(--H) * 0.16), 27vw);
+}
+.p-quadrada {
+  width: min(calc(var(--H) * 0.24), 46vw);
+}
+.p-larga {
+  width: min(calc(var(--H) * 0.44), 76vw);
+}
+.p-pequena figcaption {
+  height: 34px;
+  font-size: 14px;
+}
+.arranjo-leque .polaroid + .polaroid {
+  margin-left: -18px;
+}
+
+/* tirinha de cabine */
+.tirinha {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: min(calc(var(--H) * 0.15 + 16px), 34vw);
+  background: var(--papel);
+  padding: 8px 8px 0;
+  border-radius: 3px;
+  box-shadow:
+    0 22px 40px -20px var(--sombra),
+    0 2px 6px rgba(8, 2, 20, 0.35);
+  transform: rotate(var(--r, 0deg));
+}
+.pendurado .tirinha {
+  margin-top: 12px;
+  transform-origin: 50% 0;
+}
+.apoiado .tirinha {
+  margin-bottom: 12px;
+  transform-origin: 50% 100%;
+}
+.tirinha .vazio {
+  outline-offset: -5px;
+  gap: 3px;
+}
+.tirinha .icone {
+  width: 20px;
+  height: 20px;
+}
+.tirinha .vazio b {
+  font-size: 10px;
+}
+.tirinha-legenda {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 14px/1 var(--f-mao);
+  color: var(--tinta-suave);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* pregador de madeira */
+.pregador {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  width: 12px;
+  height: 32px;
+  margin-left: -6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--madeira-escura), var(--madeira) 35%, var(--madeira) 65%, var(--madeira-escura));
+  box-shadow: 0 2px 4px rgba(8, 2, 20, 0.45);
+}
+.pregador::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 44%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mola);
+}
+.pendurado .pregador {
+  top: -21px;
+}
+.apoiado .pregador {
+  bottom: -21px;
+}
+
+/* ---------- carta final ---------- */
+.carta {
+  position: relative;
+  margin-top: 12px;
+  width: min(440px, 84vw);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--papel);
+  color: var(--tinta);
+  padding: 28px 28px 24px;
+  border-radius: 4px;
+  box-shadow:
+    0 30px 60px -24px var(--sombra),
+    0 2px 8px rgba(8, 2, 20, 0.35);
+  transform: rotate(var(--r, 0deg));
+  transform-origin: 50% 0;
+}
+.carta .pregador.p1 {
+  left: 22%;
+}
+.carta .pregador.p2 {
+  left: 78%;
+}
+.carta .sobrelinha {
+  color: var(--tinta-suave);
+}
+.carta-titulo {
+  margin: 0;
+  font: 400 clamp(28px, 3vw, 38px) / 1.05 var(--f-titulo);
+}
+.carta-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.carta-corpo .nota-dica {
+  color: var(--tinta-suave);
+}
+.carta-corpo .nota-texto {
+  color: var(--tinta);
+  max-height: calc(var(--H) * 0.42);
+  overflow-y: auto;
+}
+.carta .pautas i {
+  border-bottom-color: rgba(125, 104, 163, 0.38);
+}
+.assinatura {
+  margin: 6px 0 0;
+  font: 21px/1.2 var(--f-mao);
+  color: var(--tinta);
+}
+.carta .vaga {
+  color: var(--tinta-suave);
+  text-decoration-color: rgba(125, 104, 163, 0.6);
+}
+
+.encerramento {
+  margin: 0 0 22px;
+  font: clamp(22px, 2.6vw, 30px) / 1.2 var(--f-mao);
+  color: var(--lampada);
+  white-space: nowrap;
+}
+.fim .conteudo {
+  width: auto;
+}
+
+/* ---------- navegação ---------- */
+.hud {
+  position: absolute;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  transform: translateX(-50%);
+  width: min(440px, calc(100% - 32px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px;
+  background: rgba(20, 7, 38, 0.72);
+  border: 1px solid var(--vidro-borda);
+  border-radius: 999px;
+}
+.hud button {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: transparent;
+  color: var(--texto);
+  border: 1px solid var(--vidro-borda);
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+.hud button svg {
+  width: 18px;
+  height: 18px;
+}
+.hud button:hover:not(:disabled) {
+  background: rgba(217, 198, 255, 0.14);
+}
+.hud button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.hud button:focus-visible {
+  outline: 2px solid var(--lampada);
+  outline-offset: 2px;
+}
+.hud-meio {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#rotulo {
+  font: 600 11px/1 var(--f-texto);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lilas);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.barra {
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(217, 198, 255, 0.18);
+  overflow: hidden;
+}
+.barra i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--lilas), var(--lampada));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+/* paisagem: fotos e textos lado a lado */
+@media (min-aspect-ratio: 11/10) {
+  .conteudo {
+    flex-direction: row;
+    width: auto;
+    gap: clamp(20px, 2.4vw, 36px);
+  }
+  .pendurado .conteudo {
+    align-items: flex-start;
+  }
+  .apoiado .conteudo {
+    align-items: flex-end;
+  }
+  .textos {
+    width: clamp(240px, 24vw, 320px);
+  }
+  .textos.largo {
+    width: clamp(280px, 30vw, 400px);
+  }
+  .abertura .textos {
+    width: clamp(300px, 40vw, 560px);
+  }
+  .pendurado .textos {
+    padding-top: 34px;
+  }
+  .apoiado .textos {
+    padding-bottom: 34px;
+  }
+  .nota .pautas i:nth-child(n + 2) {
+    display: block;
+  }
+  .p-grande {
+    width: min(calc(var(--H) * 0.32), 40vw);
+  }
+  .nota-texto {
+    max-height: calc(var(--H) * 0.4);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --esc: 0.7;
+  }
+}
+
+@media (max-height: 520px) {
+  .m-titulo {
+    font-size: 22px;
+  }
+  .nome {
+    font-size: 46px;
+  }
+  .nota-dica {
+    font-size: 13px;
+  }
+  .nota .pautas {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dica-rolagem span,
+  .luz.viva {
+    animation: none;
+  }
+  .lampada,
+  .lampada .halo,
+  .lampada .aura,
+  .hud button {
+    transition: none;
+  }
+}

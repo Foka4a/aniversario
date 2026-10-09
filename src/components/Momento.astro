@@ -1,0 +1,82 @@
+---
+import type { Momento } from '../tipos';
+import Polaroid, { type Tamanho } from './Polaroid.astro';
+import Quadro from './Quadro.astro';
+import Mensagem from './Mensagem.astro';
+import { arranjoDe, doisDigitos, giro } from '../lib/fotos';
+
+interface Props {
+  m: Momento;
+  indice: number;
+  total: number;
+  lado: 'pendurado' | 'apoiado';
+  primeiraFoto: number;
+}
+
+const { m, indice, total, lado, primeiraFoto } = Astro.props;
+const arranjo = arranjoDe(m);
+const n = doisDigitos(indice + 1);
+const rotulo = `Momento ${n} de ${doisDigitos(total)}`;
+
+const tamanhoPorArranjo: Record<string, Tamanho> = {
+  grande: 'grande',
+  dupla: 'media',
+  quadrada: 'quadrada',
+  panoramica: 'larga',
+  leque: 'pequena',
+};
+const longa = arranjo === 'quadrada' || (m.mensagem ?? '').length > 420;
+const giroBase = indice * 3;
+const giroLeque = [-7, 1, 7, -4, 4];
+---
+
+<section class={`estacao ${lado}`} data-rotulo={rotulo} aria-label={`Momento ${n}`}>
+  <div class="conteudo">
+    {lado === 'apoiado' && (
+      <div class={`textos${longa ? ' largo' : ''}`}>
+        <header class="m-cabeca">
+          <p class="sobrelinha">
+            <span>Momento {n}</span><i class="ponto"></i>
+            <span class={m.data ? 'data' : 'data vaga'}>{m.data || 'dd / mm / aaaa'}</span>
+          </p>
+          <h2 class="m-titulo">{m.titulo ? m.titulo : <span class="vaga">Título do momento</span>}</h2>
+        </header>
+        <Mensagem texto={m.mensagem} dica={m.dica} linhas={longa ? 5 : 3} rotulo={longa ? 'Mensagem longa' : 'Mensagem'} />
+      </div>
+    )}
+
+    <div class={`fotos arranjo-${arranjo}`}>
+      {arranjo === 'tirinha' ? (
+        <div class="tirinha" style={`--r:${giro(giroBase + 3)}deg`}>
+          <i class="pregador" aria-hidden="true"></i>
+          {m.fotos.map((f, k) => (
+            <Quadro foto={f} numero={primeiraFoto + k} formatoPadrao="quadrada" sizes="(max-aspect-ratio: 11/10) 34vw, 15vh" mostrarFormato={false} />
+          ))}
+          <span class="tirinha-legenda">{m.fotos[0]?.legenda}</span>
+        </div>
+      ) : (
+        m.fotos.map((f, k) => (
+          <Polaroid
+            foto={f}
+            numero={primeiraFoto + k}
+            tamanho={tamanhoPorArranjo[arranjo]}
+            giro={arranjo === 'leque' ? giroLeque[k % giroLeque.length] : giro(giroBase + k)}
+          />
+        ))
+      )}
+    </div>
+
+    {lado === 'pendurado' && (
+      <div class={`textos${longa ? ' largo' : ''}`}>
+        <header class="m-cabeca">
+          <p class="sobrelinha">
+            <span>Momento {n}</span><i class="ponto"></i>
+            <span class={m.data ? 'data' : 'data vaga'}>{m.data || 'dd / mm / aaaa'}</span>
+          </p>
+          <h2 class="m-titulo">{m.titulo ? m.titulo : <span class="vaga">Título do momento</span>}</h2>
+        </header>
+        <Mensagem texto={m.mensagem} dica={m.dica} linhas={longa ? 5 : 3} rotulo={longa ? 'Mensagem longa' : 'Mensagem'} />
+      </div>
+    )}
+  </div>
+</section>

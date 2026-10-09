@@ -1,0 +1,32 @@
+---
+interface Props {
+  texto?: string;
+  dica?: string;
+  rotulo?: string;
+  linhas?: number;
+  classe?: string;
+}
+
+const { texto, dica, rotulo = 'Mensagem', linhas = 3, classe = 'nota' } = Astro.props;
+const paragrafos = (texto ?? '')
+  .trim()
+  .split(/\n\s*\n/)
+  .map((p) => p.trim())
+  .filter(Boolean);
+---
+
+<div class={classe}>
+  {rotulo && <p class="nota-rotulo">{rotulo}</p>}
+  {paragrafos.length > 0 ? (
+    <div class="nota-texto">
+      {paragrafos.map((p) => <p>{p}</p>)}
+    </div>
+  ) : (
+    <>
+      {dica && <p class="nota-dica">{dica}</p>}
+      <div class="pautas" aria-hidden="true">
+        {Array.from({ length: linhas }, () => <i></i>)}
+      </div>
+    </>
+  )}
+</div>

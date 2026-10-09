@@ -1,0 +1,39 @@
+---
+import type { Foto, Formato } from '../tipos';
+import Quadro from './Quadro.astro';
+
+export type Tamanho = 'grande' | 'media' | 'pequena' | 'quadrada' | 'larga';
+
+interface Props {
+  foto: Foto;
+  numero: number;
+  tamanho: Tamanho;
+  giro: number;
+  prioridade?: boolean;
+}
+
+const { foto, numero, tamanho, giro, prioridade } = Astro.props;
+
+const formatoPadrao: Record<Tamanho, Formato> = {
+  grande: 'retrato',
+  media: 'retrato',
+  pequena: 'retrato',
+  quadrada: 'quadrada',
+  larga: 'paisagem',
+};
+
+/* Largura aproximada na tela, para o navegador baixar só o tamanho necessário. */
+const sizes: Record<Tamanho, string> = {
+  grande: '(max-aspect-ratio: 11/10) 56vw, 32vh',
+  media: '(max-aspect-ratio: 11/10) 38vw, 22vh',
+  pequena: '(max-aspect-ratio: 11/10) 27vw, 16vh',
+  quadrada: '(max-aspect-ratio: 11/10) 46vw, 24vh',
+  larga: '(max-aspect-ratio: 11/10) 76vw, 44vh',
+};
+---
+
+<figure class={`polaroid p-${tamanho}`} style={`--r:${giro}deg`}>
+  <i class="pregador" aria-hidden="true"></i>
+  <Quadro foto={foto} numero={numero} formatoPadrao={formatoPadrao[tamanho]} sizes={sizes[tamanho]} prioridade={prioridade} />
+  <figcaption>{foto.legenda}</figcaption>
+</figure>
